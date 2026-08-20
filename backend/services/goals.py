@@ -68,7 +68,7 @@ async def get_monthly_goals(
     return await goals_repo.get_for_user(db, user, goal_id)
 
 
-async def get_monthy_progress(
+async def get_monthly_progress(
     db: AsyncSession,
     *,
     user: User,
@@ -103,23 +103,3 @@ async def get_monthy_progress(
         "total_expense": total_expense,
         "difference": difference,
     }
-
-
-async def get_monthly_progress(
-    db: AsyncSession,
-    *,
-    user: User,
-    month: int,
-    goal_id: int | None = None,
-    year: int | None = None,
-) -> Optional[dict]:
-    """Spelling-safe alias for get_monthy_progress."""
-    return await get_monthy_progress(
-        db,
-        user=user,
-        month=month,
-        goal_id=goal_id,
-        year=year,
-    )
-
-

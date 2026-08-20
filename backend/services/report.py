@@ -9,16 +9,21 @@ from repositories import categories as categories_repo
 from repositories import expenses as expenses_repo
 
 
-def _get_month_bounds(month: int) -> tuple[datetime.datetime, datetime.datetime]:
+def _get_month_bounds(
+    month: int, year: int | None = None
+) -> tuple[datetime.datetime, datetime.datetime]:
     if month < 1 or month > 12:
         raise ValueError("month must be between 1 and 12")
 
-    current_year = datetime.datetime.now(datetime.UTC).year
-    _, num_days = calendar.monthrange(current_year, month)
+    resolved_year = datetime.datetime.now(datetime.UTC).year if year is None else year
+    if resolved_year < 1:
+        raise ValueError("year must be >= 1")
 
-    start_at = datetime.datetime(current_year, month, 1, 0, 0, 0, tzinfo=datetime.UTC)
+    _, num_days = calendar.monthrange(resolved_year, month)
+
+    start_at = datetime.datetime(resolved_year, month, 1, 0, 0, 0, tzinfo=datetime.UTC)
     end_at = datetime.datetime(
-        current_year,
+        resolved_year,
         month,
         num_days,
         23,
@@ -65,8 +70,10 @@ def top_5_categories(category_totals: list[dict]) -> list[dict]:
     return category_totals[:5]
 
 
-async def get_monthly_report(db: AsyncSession, user: User, *, month: int) -> dict:
-    start_at, end_at = _get_month_bounds(month)
+async def get_monthly_report(
+    db: AsyncSession, user: User, *, month: int, year: int | None = None
+) -> dict:
+    start_at, end_at = _get_month_bounds(month, year)
 
     monthly_expenses = await expenses_repo.list_for_user(
         db,
