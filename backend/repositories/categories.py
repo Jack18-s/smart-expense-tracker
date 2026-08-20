@@ -41,16 +41,16 @@ async def get_by_name_for_user(db: AsyncSession, user: User, category_name:str)-
 
 async def create_for_user(db: AsyncSession, user: User, name:str, description:str) -> Optional[Category]:
     if await get_by_name_for_user(db, user, name):
-        raise CategoryAlreadyExists(f"Category with '{name}' already exists") 
-    try :
-        category = Category(user_id=user.id, name=name, description=description)
+        raise CategoryAlreadyExists(f"Category with '{name}' already exists")
+    category = Category(user_id=user.id, name=name, description=description)
+    try:
         db.add(category)
         await db.commit()
         await db.refresh(category)
-        return category
     except IntegrityError:
         await db.rollback()
-              
+        raise CategoryAlreadyExists(f"Category with '{name}' already exists")
+
     return category
 
 

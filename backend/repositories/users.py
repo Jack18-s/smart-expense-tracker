@@ -57,13 +57,14 @@ async def create(db: AsyncSession, *, username: str, email: str, password_hash: 
          raise EmailAlreadyExists(f"User with {email} already exists")
    user = User(username=username, email=email, password_hash=password_hash)
 
-   try: 
+   try:
         db.add(user)
         await db.commit()
         await db.refresh(user)
-        
    except IntegrityError:
         await db.rollback()
+        raise EmailAlreadyExists(f"User with {email} already exists")
+
    return user
       
 
