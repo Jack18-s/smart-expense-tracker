@@ -1,4 +1,3 @@
-import asyncio
 import datetime
 from unittest.mock import AsyncMock, patch
 
@@ -101,23 +100,21 @@ def test_get_month_bounds_rejects_invalid_year():
         _get_month_bounds(month=5, year=0)
 
 
-def test_get_monthly_report_uses_requested_year_for_bounds():
+@pytest.mark.asyncio
+async def test_get_monthly_report_uses_requested_year_for_bounds():
     # A user querying June for a past year should get bounds scoped to that
     # year, not silently coerced to the current year.
     class _FakeUser:
         id = 1
 
-    async def _run():
-        with patch(
-            "services.report.expenses_repo.list_for_user", AsyncMock(return_value=[])
-        ), patch(
-            "services.report.categories_repo.list_for_user", AsyncMock(return_value=[])
-        ):
-            return await get_monthly_report(
-                db=object(), user=_FakeUser(), month=6, year=2019
-            )
-
-    report = asyncio.run(_run())
+    with patch(
+        "services.report.expenses_repo.list_for_user", AsyncMock(return_value=[])
+    ), patch(
+        "services.report.categories_repo.list_for_user", AsyncMock(return_value=[])
+    ):
+        report = await get_monthly_report(
+            db=object(), user=_FakeUser(), month=6, year=2019
+        )
 
     assert report["year"] == 2019
     assert report["start_at"].startswith("2019-06-01")
