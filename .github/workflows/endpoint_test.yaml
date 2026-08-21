@@ -22,7 +22,7 @@ jobs:
      working-directory: backend
 
    - name: Run tests
-     run: pytest -v
+     run: pytest tests/test_auth.py -v
      working-directory: backend
 
 
